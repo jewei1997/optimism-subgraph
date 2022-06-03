@@ -4,3 +4,92 @@ type ExampleEntity @entity {
   owner: Bytes! # address
   spender: Bytes! # address
 }
+
+type Holder @entity {
+  id: ID!
+  address: Bytes!
+  balance: BigInt!
+  createdAt: BigInt!
+}
+
+type Token @entity {
+  id: ID!
+  address: Bytes!
+  decimals: Int!
+  name: String!
+  symbol: String!
+}
+
+type Delegate @entity {
+  id: ID!
+  address: Bytes!
+  numVotes: BigInt!
+  createdAt: BigInt!
+}
+
+type TokenEvent @entity {
+  id: ID!
+  token: Bytes! # token address
+  timestamp: BigInt!
+}
+
+type MintEvent implements TokenEvent @entity {
+  id: ID!
+  token: Token!
+  account: Bytes!
+  amount: BigInt!
+  timestamp: BigInt!
+}
+
+type BurnEvent implements TokenEvent @entity {
+  id: ID!
+  token: Token!
+  account: Bytes!
+  amount: BigInt!
+  timestamp: BigInt!
+}
+
+type TransferEvent implements TokenEvent @entity {
+  id: ID!
+  token: Token!
+  from: Bytes!
+  to: Bytes!
+  amount: BigInt!
+  timestamp: BigInt!
+}
+
+type ApprovalEvent implements TokenEvent @entity {
+  id: ID!
+  token: Token!
+  owner: Bytes!
+  spender: Bytes!
+  value: BigInt!
+  timestamp: BigInt!
+}
+
+type DelegateChangedEvent implements TokenEvent @entity {
+  id: ID!
+  token: Token!
+  delegate: Bytes!
+  fromDelegate: Bytes!
+  toDelegate: Bytes!
+  timestamp: BigInt!
+}
+
+type DelegateVotesChangedEvent implements TokenEvent @entity {
+  id: ID!
+  token: Token!
+  delegate: Bytes!
+  previousBalance: BigInt!
+  newBalance: BigInt!
+}
+
+type OwnershipTransferredEvent implements TokenEvent @entity {
+  id: ID!
+  token: Token!
+  previousOwner: Bytes!
+  nextOwner: Bytes!
+  fromDelegate: Bytes!
+  toDelegate: Bytes!
+  timestamp: BigInt!
+}
