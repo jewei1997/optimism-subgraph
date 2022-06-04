@@ -10,8 +10,8 @@ export function getAccount(
   let account = Account.load(accountId);
   if (account == null) {
     account = new Account(accountId);
-    account.address = accountAddress.toHex();
-    account.balance = 0;
+    account.address = accountAddress;
+    account.balance = new BigInt(0);
     account.createdAt = createdAt;
   }
   account.save();
@@ -24,8 +24,8 @@ export function getAccountByAddress(accountAddress: Address): Account {
   let account = Account.load(accountId);
   if (account == null) {
     account = new Account(accountId);
-    account.address = accountAddress.toHex();
-    account.balance = 0;
+    account.address = accountAddress;
+    account.balance = new BigInt(0);
   }
   account.save();
   return account;
@@ -37,13 +37,12 @@ export function modifyAccountTokens(
   value: BigInt,
   subtract: boolean
 ): void {
-  let accountId = accountAddress.toHex();
-  let account = Account.load(accountId);
+  let account = getAccountByAddress(accountAddress);
 
   if (subtract) {
-    account.balance -= value;
+    account.balance = account.balance.plus(value); //.subtract(value);
   } else {
-    account.balance += value;
+    account.balance = account.balance.minus(value);
   }
   account.save();
   return;

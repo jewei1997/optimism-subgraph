@@ -52,7 +52,6 @@ type ApprovalEvent @entity {
 
 type DelegateChangedEvent @entity {
   id: ID!
-  token: Token!
   delegate: Bytes!
   fromDelegate: Bytes!
   toDelegate: Bytes!
