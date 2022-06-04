@@ -14,8 +14,8 @@
     "test-full": "npm run codegen && npm run build && npm run test"
   },
   "dependencies": {
-    "@graphprotocol/graph-cli": "^0.30.1",
-    "@graphprotocol/graph-ts": "^0.27.0",
+    "@graphprotocol/graph-cli": "0.26.0",
+    "@graphprotocol/graph-ts": "0.24.1",
     "matchstick-as": "0.3.0"
   }
 }

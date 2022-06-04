@@ -1,4 +1,4 @@
-import { BigInt } from "@graphprotocol/graph-ts";
+import { BigInt, log } from "@graphprotocol/graph-ts";
 import {
   OP,
   Approval,
@@ -71,32 +71,32 @@ export function handleApproval(event: Approval): void {
 }
 
 export function handleDelegateChanged(event: DelegateChanged): void {
-  let contract = OP.bind(event.address);
-  let delegator = event.params.delegator;
-  let fromDelegate = event.params.fromDelegate;
-  let toDelegate = event.params.toDelegate;
-  let accountDelegate = AccountDelegate.load(
-    event.params.fromDelegate.toHex() + "-" + event.params.toDelegate.toHex()
-  );
-  if (accountDelegate == null) {
-    accountDelegate = new AccountDelegate(
-      event.params.fromDelegate.toHex() + "-" + event.params.toDelegate.toHex()
-    );
-  }
-  accountDelegate.from = fromDelegate.toHex();
-  accountDelegate.to = toDelegate.toHex();
-  accountDelegate.numVotesDelegated = contract.balanceOf(fromDelegate);
+  // let contract = OP.bind(event.address);
+  // let delegator = event.params.delegator;
+  // let fromDelegate = event.params.fromDelegate;
+  // let toDelegate = event.params.toDelegate;
+  // let accountDelegate = AccountDelegate.load(
+  //   event.params.fromDelegate.toHex() + "-" + event.params.toDelegate.toHex()
+  // );
+  // if (accountDelegate == null) {
+  //   accountDelegate = new AccountDelegate(
+  //     event.params.fromDelegate.toHex() + "-" + event.params.toDelegate.toHex()
+  //   );
+  // }
+  // accountDelegate.from = fromDelegate.toHex();
+  // accountDelegate.to = toDelegate.toHex();
+  // accountDelegate.numVotesDelegated = contract.balanceOf(fromDelegate);
 }
 
 export function handleDelegateVotesChanged(event: DelegateVotesChanged): void {
-  let delegate = event.params.delegate;
-  let previousBalance = event.params.previousBalance;
-  let newBalance = event.params.newBalance;
-  let accountDelegate = AccountDelegate.load(delegate.toHex());
-  if (accountDelegate == null) {
-    accountDelegate = new AccountDelegate(delegate.toHex());
-  }
-  accountDelegate.numVotesDelegated = newBalance;
+  // let delegate = event.params.delegate;
+  // let previousBalance = event.params.previousBalance;
+  // let newBalance = event.params.newBalance;
+  // let accountDelegate = AccountDelegate.load(delegate.toHex());
+  // if (accountDelegate == null) {
+  //   accountDelegate = new AccountDelegate(delegate.toHex());
+  // }
+  // accountDelegate.numVotesDelegated = newBalance;
 }
 
 export function handleOwnershipTransferred(event: OwnershipTransferred): void {
@@ -112,11 +112,11 @@ export function handleTransfer(event: Transfer): void {
 
   // Cases for transfers
   if (from.toHex() == zeroAddress && to.toHex() != zeroAddress) {
-    modifyAccountTokens(from, value, true);
+    modifyAccountTokens(to, value, false);
   } else if (from.toHex() != zeroAddress && to.toHex() == zeroAddress) {
-    modifyAccountTokens(from, value, false);
+    modifyAccountTokens(from, value, true);
   } else {
     modifyAccountTokens(from, value, true);
-    modifyAccountTokens(from, value, false);
+    modifyAccountTokens(to, value, false);
   }
 }
