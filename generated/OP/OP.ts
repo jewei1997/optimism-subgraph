@@ -250,7 +250,7 @@ export class OP extends ethereum.SmartContract {
       ]
     );
 
-    return result[0].toTuple() as OP__checkpointsResultValue0Struct;
+    return changetype<OP__checkpointsResultValue0Struct>(result[0].toTuple());
   }
 
   try_checkpoints(
@@ -270,7 +270,7 @@ export class OP extends ethereum.SmartContract {
     }
     let value = result.value;
     return ethereum.CallResult.fromValue(
-      value[0].toTuple() as OP__checkpointsResultValue0Struct
+      changetype<OP__checkpointsResultValue0Struct>(value[0].toTuple())
     );
   }
 
