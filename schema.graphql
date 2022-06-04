@@ -5,7 +5,7 @@ type Account @entity {
   createdAt: BigInt!
 }
 
-type AccountDelegate {
+type AccountDelegate @entity {
   id: ID!
   from: Account!
   to: Account!

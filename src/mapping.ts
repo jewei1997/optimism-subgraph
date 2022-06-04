@@ -1,37 +1,44 @@
-import { BigInt } from "@graphprotocol/graph-ts"
+import { BigInt } from "@graphprotocol/graph-ts";
 import {
   OP,
   Approval,
   DelegateChanged,
   DelegateVotesChanged,
   OwnershipTransferred,
-  Transfer
-} from "../generated/OP/OP"
-import { ExampleEntity } from "../generated/schema"
+  Transfer,
+} from "../generated/OP/OP";
+import { ExampleEntity, AccountDelegate } from "../generated/schema";
+import {
+  getAccount,
+  getAccountByAddress,
+  modifyAccountTokens,
+} from "./helpers";
+
+const zeroAddress = "0x0000000000000000000000000000000000000000";
 
 export function handleApproval(event: Approval): void {
   // Entities can be loaded from the store using a string ID; this ID
   // needs to be unique across all entities of the same type
-  let entity = ExampleEntity.load(event.transaction.from.toHex())
+  let entity = ExampleEntity.load(event.transaction.from.toHex());
 
   // Entities only exist after they have been saved to the store;
   // `null` checks allow to create entities on demand
   if (!entity) {
-    entity = new ExampleEntity(event.transaction.from.toHex())
+    entity = new ExampleEntity(event.transaction.from.toHex());
 
     // Entity fields can be set using simple assignments
-    entity.count = BigInt.fromI32(0)
+    entity.count = BigInt.fromI32(0);
   }
 
   // BigInt and BigDecimal math are supported
-  entity.count = entity.count + BigInt.fromI32(1)
+  entity.count = entity.count + BigInt.fromI32(1);
 
   // Entity fields can be set based on event parameters
-  entity.owner = event.params.owner
-  entity.spender = event.params.spender
+  entity.owner = event.params.owner;
+  entity.spender = event.params.spender;
 
   // Entities can be written to the store with `.save()`
-  entity.save()
+  entity.save();
 
   // Note: If a handler doesn't require existing field values, it is faster
   // _not_ to load the entity from the store. Instead, create it fresh with
@@ -70,10 +77,47 @@ export function handleApproval(event: Approval): void {
   // - contract.transferFrom(...)
 }
 
-export function handleDelegateChanged(event: DelegateChanged): void {}
+export function handleDelegateChanged(event: DelegateChanged): void {
+  let delegator = event.params.delegator;
+  let fromDelegate = event.params.fromDelegate;
+  let toDelegate = event.params.toDelegate;
+  let accountDelegate = AccountDelegate.load(
+    event.params.fromDelegate.toHex + "-" + event.params.toDelegate.toHex
+  );
+  if (accountDelegate == null) {
+    accountDelegate = new AccountDelegate(
+      event.params.fromDelegate.toHex + "-" + event.params.toDelegate.toHex
+    );
+  }
+  // TODO
+}
 
-export function handleDelegateVotesChanged(event: DelegateVotesChanged): void {}
+export function handleDelegateVotesChanged(event: DelegateVotesChanged): void {
+  let delegate = event.params.delegate;
+  let previousBalance = event.params.previousBalance;
+  let newBalance = event.params.newBalance;
+  // TODO
+}
 
-export function handleOwnershipTransferred(event: OwnershipTransferred): void {}
+export function handleOwnershipTransferred(event: OwnershipTransferred): void {
+  let newOwner = event.params.newOwner;
+  let previousOwner = event.params.previousOwner;
 
-export function handleTransfer(event: Transfer): void {}
+  //let account = getAccountByAddress(event.address);
+}
+
+export function handleTransfer(event: Transfer): void {
+  let from = event.params.from;
+  let to = event.params.to;
+  let value = event.params.value;
+
+  // Cases for transfers
+  if (from.toHex() == zeroAddress && to.toHex() != zeroAddress) {
+    modifyAccountTokens(from, value, true);
+  } else if (from.toHex() != zeroAddress && to.toHex() == zeroAddress) {
+    modifyAccountTokens(from, value, false);
+  } else {
+    modifyAccountTokens(from, value, true);
+    modifyAccountTokens(from, value, false);
+  }
+}
