@@ -45,8 +45,8 @@ jobs:
           token: # optional, default is ${{ github.token }}
 
       # We use this GitHub Action to properly handle all edge cases in caching node_modules: https://github.com/marketplace/actions/npm-install-cache
-      - name: NPM install cache
-        uses: c-hive/gha-npm-cache@v1
+      # - name: NPM install cache
+      #   uses: c-hive/gha-npm-cache@v1
 
       # Runs a set of commands using the runners shell
       - name: Install packages
