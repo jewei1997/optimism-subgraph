@@ -36,6 +36,7 @@ type DelegateVotesChangedEvent @entity {
   delegate: String!
   previousBalance: BigInt!
   newBalance: BigInt!
+  timestamp: BigInt!
 }
 
 type OwnershipTransferredEvent @entity {

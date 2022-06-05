@@ -8,6 +8,7 @@ import {
   OwnershipTransferred,
   Transfer,
 } from "../generated/OP/OP";
+import { ApprovalEvent, DelegateChangedEvent, DelegateVotesChangedEvent, OwnershipTransferredEvent, TransferEvent } from "../generated/schema";
 import {
   getAccount,
   modifyAccountTokens,
@@ -16,7 +17,13 @@ import {
 const zeroAddress = "0x0000000000000000000000000000000000000000";
 
 export function handleApproval(event: Approval): void {
-  // // Entities can be loaded from the store using a string ID; this ID
+  let approvalEvent = new ApprovalEvent(event.transaction.hash.toHex() + "-" + event.logIndex.toString());
+  approvalEvent.owner = event.params.owner.toHex();
+  approvalEvent.spender = event.params.spender.toHex();
+  approvalEvent.value = event.params.value;
+  approvalEvent.timestamp = event.block.timestamp;
+  approvalEvent.save();
+  // Entities can be loaded from the store using a string ID; this ID
   // // needs to be unique across all entities of the same type
   // let entity = ExampleEntity.load(event.transaction.from.toHex());
   // // Entities only exist after they have been saved to the store;
@@ -84,12 +91,18 @@ export function handleDelegateChanged(event: DelegateChanged): void {
   let createdAt = event.block.timestamp;
   let delegatorAccount = getAccount(delegator, createdAt);
 
+  // first save the delegate changed event
+  let delegateChangedEvent = new DelegateChangedEvent(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
+  delegateChangedEvent.delegate = delegator.toHex()
+  delegateChangedEvent.fromDelegate = fromDelegate.toHex()
+  delegateChangedEvent.toDelegate = toDelegate.toHex()
+  delegateChangedEvent.timestamp = event.block.timestamp
+  delegateChangedEvent.save()
+
   // special cases:
   // delegate to yourself: delegateAccount == toAccount
   // delegate from yourself to someone else: delegateAccount == fromAccount
   // delegate from yourself to yourself: delegateAccount == fromAccount == toAccount
-  log.info("delegator.toHex = {}", [delegator.toHex()]);
-  log.info("toDelegate.toHex = {}", [toDelegate.toHex()]);
   if (((fromDelegate.toHex() == toDelegate.toHex()) && (fromDelegate.toHex() == delegator.toHex()) && toDelegate.toHex() == delegator.toHex())) {
     if (delegatorAccount.delegatedTo == delegator.toHex()) { // If I'm already delegating to myself, do nothing
       return
@@ -119,8 +132,6 @@ export function handleDelegateChanged(event: DelegateChanged): void {
   let toAccount = getAccount(toDelegate, createdAt)
   delegatorAccount.delegatedTo = toDelegate.toHex();
   delegatorAccount.save();
-  log.info("delegatorAccount.delegatedTo = {}", ["0x0"]);
-  log.info("delegatorAccount.delegatedTo = {}", [delegatorAccount.delegatedTo]);
   
   delegatorAccount.votingPower = BigInt.fromI32(0);
   fromAccount.votingPower = fromAccount.votingPower.minus(contract.balanceOf(delegator))
@@ -132,6 +143,14 @@ export function handleDelegateChanged(event: DelegateChanged): void {
 }
 
 export function handleDelegateVotesChanged(event: DelegateVotesChanged): void {
+  // first save the basic event
+  let delegateVotesChangedEvent = new DelegateVotesChangedEvent(event.transaction.hash.toHex() + "-"+ event.logIndex.toString())
+  delegateVotesChangedEvent.delegate = event.params.delegate.toHex();
+  delegateVotesChangedEvent.previousBalance = event.params.previousBalance;
+  delegateVotesChangedEvent.newBalance = event.params.newBalance;
+  delegateVotesChangedEvent.timestamp = event.block.timestamp
+  delegateVotesChangedEvent.save()
+
   let delegate = event.params.delegate;
   let previousBalance = event.params.previousBalance;
   let newBalance = event.params.newBalance;
@@ -143,13 +162,25 @@ export function handleDelegateVotesChanged(event: DelegateVotesChanged): void {
 export function handleOwnershipTransferred(event: OwnershipTransferred): void {
   let newOwner = event.params.newOwner;
   let previousOwner = event.params.previousOwner;
-  //let account = getAccountByAddress(event.address);
+
+  let ownershipTransferredEvent = new OwnershipTransferredEvent(event.transaction.hash.toHex() + "-"+ event.logIndex.toString())
+  ownershipTransferredEvent.previousOwner = previousOwner.toHex()
+  ownershipTransferredEvent.nextOwner = newOwner.toHex()
+  ownershipTransferredEvent.save()
 }
 
 export function handleTransfer(event: Transfer): void {
   let from = event.params.from;
   let to = event.params.to;
   let value = event.params.value;
+
+  // first save the basic event
+  let transfer = new TransferEvent(event.transaction.hash.toHex() + "-"+ event.logIndex.toString())
+  transfer.from = from.toHex()
+  transfer.to = to.toHex()
+  transfer.amount = value
+  transfer.timestamp = event.block.timestamp
+  transfer.save()
 
   // Cases for transfers
   if (from.toHex() == zeroAddress && to.toHex() != zeroAddress) { // mint
@@ -160,7 +191,6 @@ export function handleTransfer(event: Transfer): void {
     modifyAccountTokens(from, value, true);
     modifyAccountTokens(to, value, false);
   }
-  // let transfer = new TransferEvent()
 }
 
 
