@@ -153,11 +153,11 @@ export function handleTransfer(event: Transfer): void {
 
   // Cases for transfers
   if (from.toHex() == zeroAddress && to.toHex() != zeroAddress) {
-    modifyAccountTokens(from, value, true);
+    modifyAccountTokens(to, value, false);
   } else if (from.toHex() != zeroAddress && to.toHex() == zeroAddress) {
-    modifyAccountTokens(from, value, false);
+    modifyAccountTokens(from, value, true);
   } else {
     modifyAccountTokens(from, value, true);
-    modifyAccountTokens(from, value, false);
+    modifyAccountTokens(to, value, false);
   }
 }
