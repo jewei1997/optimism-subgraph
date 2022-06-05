@@ -7,35 +7,6 @@ type Account @entity {
   createdAt: BigInt!
 }
 
-# type AccountDelegate @entity {
-#   id: ID!
-#   from: String!
-#   to: String!
-#   numVotesDelegated: BigInt!
-# }
-
-# type Delegation @entity {
-#   id: ID!
-#   address: String!
-#   numVotesToGive: BigInt! # constant
-#   numVotesReceived: BigInt!
-#   createdAt: BigInt!
-# }
-
-type MintEvent @entity {
-  id: ID!
-  account: String!
-  amount: BigInt!
-  timestamp: BigInt!
-}
-
-type BurnEvent @entity {
-  id: ID!
-  account: String!
-  amount: BigInt!
-  timestamp: BigInt!
-}
-
 type TransferEvent @entity {
   id: ID!
   from: String!

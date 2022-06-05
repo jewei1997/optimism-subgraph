@@ -90,7 +90,7 @@ export function handleDelegateChanged(event: DelegateChanged): void {
   // delegate from yourself to yourself: delegateAccount == fromAccount == toAccount
   log.info("delegator.toHex = {}", [delegator.toHex()]);
   log.info("toDelegate.toHex = {}", [toDelegate.toHex()]);
-  if ((fromDelegate.toHex() == toDelegate.toHex()) && (fromDelegate.toHex() == delegator.toHex())) {
+  if (((fromDelegate.toHex() == toDelegate.toHex()) && (fromDelegate.toHex() == delegator.toHex()) && toDelegate.toHex() == delegator.toHex())) {
     if (delegatorAccount.delegatedTo == delegator.toHex()) { // If I'm already delegating to myself, do nothing
       return
     }
@@ -152,12 +152,15 @@ export function handleTransfer(event: Transfer): void {
   let value = event.params.value;
 
   // Cases for transfers
-  if (from.toHex() == zeroAddress && to.toHex() != zeroAddress) {
+  if (from.toHex() == zeroAddress && to.toHex() != zeroAddress) { // mint
     modifyAccountTokens(to, value, false);
-  } else if (from.toHex() != zeroAddress && to.toHex() == zeroAddress) {
+  } else if (from.toHex() != zeroAddress && to.toHex() == zeroAddress) { // burn
     modifyAccountTokens(from, value, true);
-  } else {
+  } else { // transfer
     modifyAccountTokens(from, value, true);
     modifyAccountTokens(to, value, false);
   }
+  // let transfer = new TransferEvent()
 }
+
+
