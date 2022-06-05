@@ -1,73 +1,75 @@
 type Account @entity {
   id: ID!
-  address: Bytes!
+  address: String!
   balance: BigInt!
+  votingPower: BigInt!
+  delegatedTo: String!
   createdAt: BigInt!
 }
 
-type AccountDelegate @entity {
-  id: ID!
-  from: Account!
-  to: Account!
-  numVotesDelegated: BigInt!
-}
+# type AccountDelegate @entity {
+#   id: ID!
+#   from: String!
+#   to: String!
+#   numVotesDelegated: BigInt!
+# }
 
-type Delegation @entity {
-  id: ID!
-  address: Bytes!
-  numVotes: BigInt!
-  numVotesReceived: BigInt!
-  createdAt: BigInt!
-}
+# type Delegation @entity {
+#   id: ID!
+#   address: String!
+#   numVotesToGive: BigInt! # constant
+#   numVotesReceived: BigInt!
+#   createdAt: BigInt!
+# }
 
 type MintEvent @entity {
   id: ID!
-  account: Bytes!
+  account: String!
   amount: BigInt!
   timestamp: BigInt!
 }
 
 type BurnEvent @entity {
   id: ID!
-  account: Bytes!
+  account: String!
   amount: BigInt!
   timestamp: BigInt!
 }
 
 type TransferEvent @entity {
   id: ID!
-  from: Bytes!
-  to: Bytes!
+  from: String!
+  to: String!
   amount: BigInt!
   timestamp: BigInt!
 }
 
 type ApprovalEvent @entity {
   id: ID!
-  owner: Bytes!
-  spender: Bytes!
+  owner: String!
+  spender: String!
   value: BigInt!
   timestamp: BigInt!
 }
 
 type DelegateChangedEvent @entity {
   id: ID!
-  delegate: Bytes!
-  fromDelegate: Bytes!
-  toDelegate: Bytes!
+  delegate: String!
+  fromDelegate: String!
+  toDelegate: String!
   timestamp: BigInt!
 }
 
 type DelegateVotesChangedEvent @entity {
   id: ID!
-  delegate: Bytes!
+  delegate: String!
   previousBalance: BigInt!
   newBalance: BigInt!
 }
 
 type OwnershipTransferredEvent @entity {
   id: ID!
-  previousOwner: Bytes!
-  nextOwner: Bytes!
+  previousOwner: String!
+  nextOwner: String!
   timestamp: BigInt!
 }

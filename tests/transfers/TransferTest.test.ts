@@ -47,7 +47,6 @@ export function createTransfer(
   value: BigInt
 ): TransferEvent {
   let mockEvent = newMockEvent();
-  console.log("in createTransfer...");
   let newTransferEvent = new TransferEvent(
     Address.fromString(tokenAddress),
     mockEvent.logIndex,
@@ -55,8 +54,7 @@ export function createTransfer(
     mockEvent.logType,
     mockEvent.block,
     mockEvent.transaction,
-    mockEvent.parameters,
-    null
+    mockEvent.parameters
   );
   newTransferEvent.parameters = new Array();
   let fromParam = new ethereum.EventParam(

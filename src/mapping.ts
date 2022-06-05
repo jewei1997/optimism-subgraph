@@ -1,4 +1,5 @@
 import { BigInt } from "@graphprotocol/graph-ts";
+import { log } from "matchstick-as";
 import {
   OP,
   Approval,
@@ -7,10 +8,8 @@ import {
   OwnershipTransferred,
   Transfer,
 } from "../generated/OP/OP";
-import { AccountDelegate } from "../generated/schema";
 import {
   getAccount,
-  getAccountByAddress,
   modifyAccountTokens,
 } from "./helpers";
 
@@ -75,28 +74,70 @@ export function handleDelegateChanged(event: DelegateChanged): void {
   let delegator = event.params.delegator;
   let fromDelegate = event.params.fromDelegate;
   let toDelegate = event.params.toDelegate;
-  let accountDelegate = AccountDelegate.load(
-    event.params.fromDelegate.toHex() + "-" + event.params.toDelegate.toHex()
-  );
-  if (accountDelegate == null) {
-    accountDelegate = new AccountDelegate(
-      event.params.fromDelegate.toHex() + "-" + event.params.toDelegate.toHex()
-    );
+  // getAccount
+  // let's say A (delegator) changes delegate from B (from) to C (to)
+  // change who A delegated to
+  // change A's votingPower to 0
+  // change B's votingPower -= A's balance
+  // change C's votingPower += A's balance
+
+  let createdAt = event.block.timestamp;
+  let delegatorAccount = getAccount(delegator, createdAt);
+
+  // special cases:
+  // delegate to yourself: delegateAccount == toAccount
+  // delegate from yourself to someone else: delegateAccount == fromAccount
+  // delegate from yourself to yourself: delegateAccount == fromAccount == toAccount
+  log.info("delegator.toHex = {}", [delegator.toHex()]);
+  log.info("toDelegate.toHex = {}", [toDelegate.toHex()]);
+  if ((fromDelegate.toHex() == toDelegate.toHex()) && (fromDelegate.toHex() == delegator.toHex())) {
+    if (delegatorAccount.delegatedTo == delegator.toHex()) { // If I'm already delegating to myself, do nothing
+      return
+    }
+    delegatorAccount.delegatedTo = delegator.toHex()
+    delegatorAccount.votingPower = delegatorAccount.votingPower.plus(contract.balanceOf(delegator))
+    delegatorAccount.save()
+    return
+  } else if (fromDelegate.toHex() == delegator.toHex()) {
+    let toAccount = getAccount(toDelegate, createdAt)
+    delegatorAccount.votingPower = BigInt.fromI32(0)
+    toAccount.votingPower = toAccount.votingPower.plus(contract.balanceOf(delegator))
+    delegatorAccount.delegatedTo = toDelegate.toHex();
+    delegatorAccount.save()
+    toAccount.save()
+    return
+  } else if (delegator.toHex() == toDelegate.toHex()) {
+    let fromAccount = getAccount(fromDelegate, createdAt);
+    delegatorAccount.votingPower = contract.balanceOf(delegator);
+    fromAccount.votingPower = fromAccount.votingPower.minus(contract.balanceOf(delegator))
+    delegatorAccount.delegatedTo = delegator.toHex()
+    delegatorAccount.save();
+    fromAccount.save();
+    return
   }
-  accountDelegate.from = fromDelegate.toHex();
-  accountDelegate.to = toDelegate.toHex();
-  accountDelegate.numVotesDelegated = contract.balanceOf(fromDelegate);
+  let fromAccount = getAccount(fromDelegate, createdAt)
+  let toAccount = getAccount(toDelegate, createdAt)
+  delegatorAccount.delegatedTo = toDelegate.toHex();
+  delegatorAccount.save();
+  log.info("delegatorAccount.delegatedTo = {}", ["0x0"]);
+  log.info("delegatorAccount.delegatedTo = {}", [delegatorAccount.delegatedTo]);
+  
+  delegatorAccount.votingPower = BigInt.fromI32(0);
+  fromAccount.votingPower = fromAccount.votingPower.minus(contract.balanceOf(delegator))
+  toAccount.votingPower = toAccount.votingPower.plus(contract.balanceOf(delegator))
+
+  delegatorAccount.save();
+  fromAccount.save();
+  toAccount.save();
 }
 
 export function handleDelegateVotesChanged(event: DelegateVotesChanged): void {
   let delegate = event.params.delegate;
   let previousBalance = event.params.previousBalance;
   let newBalance = event.params.newBalance;
-  let accountDelegate = AccountDelegate.load(delegate.toHex());
-  if (accountDelegate == null) {
-    accountDelegate = new AccountDelegate(delegate.toHex());
-  }
-  accountDelegate.numVotesDelegated = newBalance;
+  let delegatorAccount = getAccount(delegate, event.block.timestamp)
+  delegatorAccount.votingPower = newBalance;
+  delegatorAccount.save();
 }
 
 export function handleOwnershipTransferred(event: OwnershipTransferred): void {
