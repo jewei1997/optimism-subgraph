@@ -7,10 +7,14 @@
     "deploy": "graph deploy --node https://api.thegraph.com/deploy/ jewei1997/op-token",
     "create-local": "graph create --node http://localhost:8020/ jewei1997/op-token",
     "remove-local": "graph remove --node http://localhost:8020/ jewei1997/op-token",
-    "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 jewei1997/op-token"
+    "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 jewei1997/op-token",
+    "full-deploy": "npm run codegen && npm run build && npm run deploy",
+    "test": "graph test -v 0.3.0",
+    "test-full": "npm run codegen && npm run build && npm run test"
   },
   "dependencies": {
-    "@graphprotocol/graph-cli": "0.22.0",
-    "@graphprotocol/graph-ts": "0.22.0"
+    "@graphprotocol/graph-cli": "^0.26.0",
+    "@graphprotocol/graph-ts": "^0.24.1",
+    "matchstick-as": "0.3.0"
   }
 }
